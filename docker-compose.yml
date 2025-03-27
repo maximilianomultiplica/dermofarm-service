@@ -1,0 +1,58 @@
+# Docker Compose file for development
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: dermofarm-api
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - IS_DOCKER=true
+      - DB_HOST=sqlserver
+      - DB_USER=${DB_USER:-sa}
+      - DB_PASSWORD=${DB_PASSWORD:-YourStrong@Passw0rd}
+      - DB_NAME=${DB_NAME:-dermofarm}
+      - DB_PORT=${DB_PORT:-1433}
+      - DB_TYPE=mssql
+    depends_on:
+      - sqlserver
+    command: sh -c "npm run start:dev"
+    networks:
+      - dermofarm-network
+    restart: unless-stopped
+
+  # SQL Server con compatibilidad para ARM64 mediante Azure SQL Edge
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: dermofarm-sqlserver
+    platform: linux/arm64
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD:-YourStrong@Passw0rd}
+      - SA_PASSWORD=${DB_PASSWORD:-YourStrong@Passw0rd}
+      - MSSQL_PID=Developer
+    ports:
+      - "${DB_PORT:-1433}:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    cap_add:
+      - SYS_PTRACE
+    networks:
+      - dermofarm-network
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+
+networks:
+  dermofarm-network:
+    driver: bridge 
