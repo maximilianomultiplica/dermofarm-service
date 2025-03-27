@@ -103,7 +103,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 👥 Autores
 
-- **Tu Nombre** - _Trabajo Inicial_ - [TuUsuario](https://github.com/TuUsuario)
+- **Dermofarm** - _Development_ - [TuUsuario](https://github.com/dermofarm)
 
 ## 🙏 Agradecimientos
 
