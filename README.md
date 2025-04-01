@@ -1,112 +1,92 @@
-# DERMOFARM Service
+# Servicio de Integración DERMOFARM
 
-Servicio de sincronización y gestión de datos para DERMOFARM, desarrollado con NestJS.
+## Descripción
+Servicio de middleware para la sincronización y gestión de datos entre DERMOFARM y el sistema del agente. Proporciona una API RESTful para la gestión de productos, clientes y órdenes, con sincronización automática programada.
 
-## 🚀 Descripción
-
-Este servicio actúa como un agente de sincronización y gestión de datos entre un sistema local y la API de DERMOFARM. Proporciona una interfaz REST para gestionar productos, órdenes y clientes, manteniendo la sincronización con el sistema principal de DERMOFARM.
-
-## ✨ Características
-
-- 🔄 Sincronización bidireccional con DERMOFARM
-- 📦 Gestión de productos y stock
-- 🛍️ Gestión de órdenes
+## Características Principales
+- 🔄 Sincronización automática con DERMOFARM
+- 🔒 Sistema de autenticación y autorización
+- 📦 Gestión completa de productos
 - 👥 Gestión de clientes
-- 🔒 Autenticación JWT con roles
-- 📊 Reportes y monitoreo
-- 🐳 Contenedorización con Docker
+- 📋 Gestión de órdenes
+- 📊 Documentación API con Swagger
 
-## 📚 Documentación
+## Requisitos
+- Node.js v18+
+- SQL Server (producción)
+- SQLite (desarrollo)
 
-- [Guía de Inicio Rápido](documentation/QUICKSTART.md) - Configuración y puesta en marcha
-- [Documentación Técnica](documentation/TECHNICAL.md) - Detalles técnicos y arquitectura
-- [Documentación Funcional](documentation/FUNCTIONAL.md) - Funcionalidades y flujos de negocio
-- [Documentación de la API](documentation/API.md) - Endpoints y uso de la API
-- [Buenas Prácticas](documentation/BEST_PRACTICES.md) - Guías y estándares de desarrollo
+## Inicio Rápido
 
-## 🛠️ Tecnologías
+1. **Clonar el repositorio:**
+   ```bash
+   git clone <repositorio>
+   cd dermofarm-service
+   ```
 
-- **Framework**: NestJS
-- **Base de Datos**: SQL Server
-- **ORM**: TypeORM
-- **Documentación**: Swagger/OpenAPI
-- **Validación**: class-validator
-- **Transformación**: class-transformer
-- **HTTP Client**: Axios
-- **Contenedorización**: Docker
+2. **Ejecutar script de inicialización:**
+   ```bash
+   ./init-script.sh
+   ```
 
-## 🚀 Inicio Rápido
+3. **Configurar variables de entorno:**
+   - Copiar .env.example a .env
+   - Ajustar las variables según el entorno
 
-1. Clonar el repositorio:
+4. **Iniciar el servidor:**
+   ```bash
+   # Desarrollo
+   npm run start:dev
 
-```bash
-git clone [URL_DEL_REPOSITORIO]
-cd dermofarm-srv
-```
+   # Producción
+   npm run start:prod
+   ```
 
-2. Configurar variables de entorno:
+## Documentación
+- 📚 [Guía Rápida](documentation/QUICKSTART.md)
+- 🔧 [Documentación Técnica](documentation/TECHNICAL_DOCUMENTATION.md)
+- ✨ [Buenas Prácticas](documentation/BEST_PRACTICES.md)
 
-```bash
-cp .env.example .env
-# Editar .env con tus configuraciones
-```
-
-3. Iniciar los servicios:
-
-```bash
-docker-compose up -d
-```
-
-4. Acceder a la documentación de la API:
-
-- Swagger UI: http://localhost:3000/api
-
-## 📁 Estructura del Proyecto
-
+## Estructura del Proyecto
 ```
 src/
-├── controllers/         # Controladores de la API
-├── services/           # Lógica de negocio
-├── entities/           # Entidades de la base de datos
-├── dto/               # Objetos de transferencia de datos
-├── guards/            # Guards de autenticación y autorización
-├── decorators/        # Decoradores personalizados
-├── config/            # Configuración de la aplicación
-└── main.ts            # Punto de entrada de la aplicación
+├── config/           # Configuraciones
+├── modules/         # Módulos principales
+├── services/        # Servicios compartidos
+└── utils/          # Utilidades
 ```
 
-## 🔒 Seguridad
+## Módulos Principales
+- 🔐 **Auth**: Autenticación y autorización
+- 📦 **Products**: Gestión de productos
+- 👥 **Customers**: Gestión de clientes
+- 📋 **Orders**: Gestión de órdenes
+- 🔄 **Sync**: Sincronización con DERMOFARM
 
-- Autenticación mediante JWT
-- Sistema de roles (admin, operator)
-- Validación de datos
-- Protección de endpoints
+## API Documentation
+La documentación de la API está disponible en:
+```
+http://localhost:3000/api
+```
 
-## 📊 Monitoreo
+## Scripts Disponibles
+- `npm run start:dev` - Iniciar en modo desarrollo
+- `npm run build` - Compilar el proyecto
+- `npm run start:prod` - Iniciar en modo producción
+- `npm run test` - Ejecutar tests
+- `npm run lint` - Verificar estilo de código
 
-- Logs de aplicación
-- Healthchecks
-- Métricas de sincronización
-- Reportes de operaciones
+## Contribución
+1. Crear rama desde `main`
+2. Realizar cambios
+3. Ejecutar tests
+4. Crear Pull Request
 
-## 🤝 Contribución
+## Soporte
+Para soporte técnico:
+- Email: soporte@dermofarm.com
+- Documentación: Ver carpeta `/documentation`
 
-1. Fork el repositorio
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📝 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
-
-## 👥 Autores
-
-- **Dermofarm** - _Development_ - [TuUsuario](https://github.com/dermofarm)
-
-## 🙏 Agradecimientos
-
-- NestJS Team
-- DERMOFARM Team
-- Todos los contribuidores
+## Licencia
+Este proyecto es privado y confidencial.
+Copyright © 2025 DERMOFARM

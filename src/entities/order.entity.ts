@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -12,6 +13,9 @@ import { Customer } from "./customer.entity";
 import { OrderItem } from "./order-item.entity";
 
 @Entity()
+@Index(['dermofarmId'])
+@Index(['status'])
+@Index(['createdAt'])
 export class Order {
   @PrimaryGeneratedColumn()
   id: number;

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -10,6 +11,8 @@ import {
 import { OrderItem } from "./order-item.entity";
 
 @Entity()
+@Index(['dermofarmId'])
+@Index(['name'])
 export class Product {
   @PrimaryGeneratedColumn()
   id: number;

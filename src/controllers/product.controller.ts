@@ -10,6 +10,11 @@ import {
   HttpStatus,
   HttpCode,
   UseGuards,
+  UseInterceptors,
+  Logger,
+  DefaultValuePipe,
+  ParseIntPipe,
+  ClassSerializerInterceptor,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -23,16 +28,22 @@ import {
   CreateProductDto,
   UpdateProductDto,
   ProductResponseDto,
-} from "../dto/product.dto";
+  PaginatedResponseDto,
+} from "../dto";
 import { JwtAuthGuard } from "../guards/jwt-auth.guard";
 import { RolesGuard } from "../guards/roles.guard";
 import { Roles } from "../decorators/roles.decorator";
+import { Product } from "../entities/product.entity";
 
 @ApiTags("products")
 @Controller("products")
 @UseGuards(JwtAuthGuard, RolesGuard)
+@UseInterceptors(ClassSerializerInterceptor)
+@ApiTags("products")
 @ApiBearerAuth()
 export class ProductController {
+  private readonly logger = new Logger(ProductController.name);
+
   constructor(private readonly productService: ProductService) {}
 
   @Post()
@@ -47,16 +58,15 @@ export class ProductController {
     status: HttpStatus.BAD_REQUEST,
     description: "Datos de producto inválidos",
   })
-  async create(
-    @Body() createProductDto: CreateProductDto
-  ): Promise<any> {
-    const product = await this.productService.create(createProductDto);
-    // Convert to response DTO format
-    return {
-      ...product,
-      sku: createProductDto.sku,
-      isActive: createProductDto.isActive ?? true,
-    };
+  async create(@Body() createProductDto: CreateProductDto): Promise<ProductResponseDto> {
+    try {
+      const product = await this.productService.create(createProductDto);
+      this.logger.log(`Producto creado con ID: ${product.id}`);
+      return this.mapToResponseDto(product);
+    } catch (error) {
+      this.logger.error(`Error al crear producto: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Get()
@@ -70,11 +80,29 @@ export class ProductController {
     type: [ProductResponseDto],
   })
   async findAll(
-    @Query("page") page = 1,
-    @Query("limit") limit = 10,
+    @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query("limit", new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query("search") search?: string
-  ) {
-    return this.productService.findAll();
+  ): Promise<PaginatedResponseDto<ProductResponseDto>> {
+    try {
+      const { items, total } = await this.productService.findAll(page, limit, search);
+      return {
+        items: items.map(item => this.mapToResponseDto(item)),
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      };
+    } catch (error) {
+      this.logger.error(`Error al obtener productos: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  private mapToResponseDto(product: Product): ProductResponseDto {
+    const responseDto = new ProductResponseDto();
+    Object.assign(responseDto, product);
+    return responseDto;
   }
 
   @Get(":id")

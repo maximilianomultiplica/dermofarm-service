@@ -1,13 +1,17 @@
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-
-import { AppModule } from "./app.module";
-import { NestFactory } from "@nestjs/core";
-import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AppModule } from './app.module';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Configuración de validación global
+  // Aplicar middleware de seguridad
+  app.use(helmet());
+  app.enableCors();
+
+  // Configuración de validación global de DTOs
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -16,28 +20,23 @@ async function bootstrap() {
     })
   );
 
-  // Configuración de CORS
-  app.enableCors();
-
   // Configuración de Swagger
   const config = new DocumentBuilder()
-    .setTitle("DERMOFARM API")
-    .setDescription(
-      "API de integración entre DERMOFARM y el ecosistema del agente"
-    )
-    .setVersion("1.0")
+    .setTitle('DERMOFARM API')
+    .setDescription('API de sincronización y gestión de datos entre DERMOFARM y el sistema del agente')
+    .setVersion('1.0')
     .addBearerAuth()
     .build();
-
+  
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api", app, document);
+  SwaggerModule.setup('api', app, document);
 
-  // Puerto de la aplicación
+  // Iniciar el servidor
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(
-    `📚 API Documentation is available at: http://localhost:${port}/api`
-  );
+  
+  console.log(`🚀 Servidor iniciado en: http://localhost:${port}`);
+  console.log(`📝 Documentación de la API: http://localhost:${port}/api`);
 }
+
 bootstrap();

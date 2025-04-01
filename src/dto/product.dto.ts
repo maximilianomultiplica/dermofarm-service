@@ -1,25 +1,31 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
-  IsBoolean,
-  IsInt,
+  IsString,
   IsNumber,
   IsOptional,
-  IsString,
+  IsBoolean,
   Min,
+  MaxLength,
+  IsNotEmpty,
 } from "class-validator";
 
 export class CreateProductDto {
   @ApiProperty({ description: "SKU del producto" })
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(50)
   sku: string;
 
   @ApiProperty({ description: "Nombre del producto" })
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
   name: string;
 
   @ApiProperty({ description: "Descripción del producto" })
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   description?: string;
 
   @ApiProperty({ description: "Precio del producto" })
@@ -28,7 +34,7 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({ description: "Stock disponible" })
-  @IsInt()
+  @IsNumber()
   @Min(0)
   stock: number;
 
@@ -42,16 +48,19 @@ export class UpdateProductDto {
   @ApiPropertyOptional({ description: "SKU del producto" })
   @IsString()
   @IsOptional()
+  @MaxLength(50)
   sku?: string;
 
   @ApiPropertyOptional({ description: "Nombre del producto" })
   @IsString()
   @IsOptional()
+  @MaxLength(100)
   name?: string;
 
   @ApiPropertyOptional({ description: "Descripción del producto" })
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   description?: string;
 
   @ApiPropertyOptional({ description: "Precio del producto" })
@@ -61,7 +70,7 @@ export class UpdateProductDto {
   price?: number;
 
   @ApiPropertyOptional({ description: "Stock disponible" })
-  @IsInt()
+  @IsNumber()
   @Min(0)
   @IsOptional()
   stock?: number;

@@ -1,24 +1,18 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 
-// Configure database based on environment
 const isDevelopment = process.env.NODE_ENV === "development";
-const isDocker = process.env.IS_DOCKER === "true";
 
-console.log("Database Configuration:", {
-  isDevelopment,
-  isDocker,
-  dbType: "mssql",
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  username: process.env.DB_USER,
-  database: process.env.DB_NAME
-});
-
-// Usar un enfoque en memoria para minimizar problemas de desarrollo
 export const typeOrmConfig: TypeOrmModuleOptions = {
-  type: "sqljs",
+  type: "mssql",
+  host: process.env.DB_HOST || "sql-ai.database.windows.net",
+  port: parseInt(process.env.DB_PORT || '1433', 10),
+  username: process.env.DB_USER || "ai_usr",
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || "dermofarm",
   entities: [__dirname + "/../**/*.entity{.ts,.js}"],
-  synchronize: true, // Auto-create database schema in development
-  logging: true,
-  autoSave: false
+  synchronize: isDevelopment,
+  logging: isDevelopment,
+  extra: {
+    trustServerCertificate: true
+  }
 };

@@ -1,47 +1,42 @@
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { WinstonModule } from 'nest-winston';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { typeOrmConfig } from './config/typeorm.config';
+import { winstonConfig } from './config/logger.config';
+import { DermofarmService } from './services/dermofarm.service';
 
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
-// Entities
-import { Customer } from "./entities/customer.entity";
-// Controllers
-import { CustomerController } from "./controllers/customer.controller";
-// Services
-import { CustomerService } from "./services/customer.service";
-import { DermofarmService } from "./services/dermofarm.service";
-import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
-import { Order } from "./entities/order.entity";
-import { OrderController } from "./controllers/order.controller";
-import { OrderItem } from "./entities/order-item.entity";
-import { OrderService } from "./services/order.service";
-import { Product } from "./entities/product.entity";
-import { ProductController } from "./controllers/product.controller";
-import { ProductService } from "./services/product.service";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { typeOrmConfig } from "./config/typeorm.config";
+// Importar los módulos core de Dermofarm
+import { ProductsModule } from './modules/products/products.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { CustomersModule } from './modules/customers/customers.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { SyncModule } from './modules/sync/sync.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      cache: true,
     }),
+    WinstonModule.forRoot(winstonConfig),
+    ThrottlerModule.forRoot([{
+      ttl: 60,
+      limit: 10,
+    }]),
     TypeOrmModule.forRoot(typeOrmConfig),
-    TypeOrmModule.forFeature([Customer, Product, Order, OrderItem]),
-    HttpModule.register({}),
+    // Registrar los módulos core de Dermofarm
+    ProductsModule,
+    OrdersModule,
+    CustomersModule,
+    AuthModule,
+    SyncModule,
   ],
-  controllers: [
-    AppController,
-    CustomerController,
-    ProductController,
-    OrderController,
-  ],
-  providers: [
-    AppService,
-    CustomerService,
-    ProductService,
-    OrderService,
-    DermofarmService,
-  ],
+  controllers: [AppController],
+  providers: [AppService, DermofarmService],
+  exports: [DermofarmService],
 })
 export class AppModule {}

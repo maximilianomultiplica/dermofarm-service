@@ -1,147 +1,143 @@
-# Guía de Inicio Rápido - DERMOFARM Service
+# Guía Rápida - Servicio DERMOFARM
 
-## 1. Requisitos Previos
+## 🚀 Inicio Rápido
 
-- Node.js 18.x o superior
-- Docker y Docker Compose
-- SQL Server 2022 (incluido en Docker)
+### 1. Requisitos Previos
+- Node.js v18 o superior
+- SQL Server (producción) / SQLite (desarrollo)
+- Acceso a la API de DERMOFARM
 
-## 2. Configuración Inicial
+### 2. Configuración Inicial
 
-### 2.1 Clonar el Repositorio
+1. Clonar el repositorio:
+\`\`\`bash
+git clone <repositorio>
+cd dermofarm-service
+\`\`\`
 
-```bash
-git clone [URL_DEL_REPOSITORIO]
-cd dermofarm-srv
-```
-
-### 2.2 Configurar Variables de Entorno
-
-Crear un archivo `.env` en la raíz del proyecto:
-
-```env
-PORT=3000
-DB_HOST=sqlserver
-DB_PORT=1433
-DB_NAME=dermofarm
-DB_USER=sa
-DB_PASSWORD=YourStrong@Passw0rd
-DERMOFARM_API_URL=http://localhost:8080/api
-```
-
-### 2.3 Instalar Dependencias
-
-```bash
+2. Instalar dependencias:
+\`\`\`bash
 npm install
-```
+\`\`\`
 
-## 3. Iniciar el Proyecto
+3. Copiar el archivo de configuración:
+\`\`\`bash
+cp .env.example .env
+\`\`\`
 
-### 3.1 Desarrollo Local
+4. Configurar las variables de entorno en el archivo .env
 
-1. Iniciar los servicios con Docker Compose:
+### 3. Ejecutar la Aplicación
 
-```bash
-docker-compose up -d
-```
-
-2. Verificar que los servicios estén corriendo:
-
-```bash
-docker-compose ps
-```
-
-3. Acceder a la documentación de la API:
-   - Swagger UI: http://localhost:3000/api
-
-### 3.2 Producción
-
-1. Construir las imágenes:
-
-```bash
-docker-compose -f deploy/docker-compose.prod.yml build
-```
-
-2. Iniciar los servicios:
-
-```bash
-docker-compose -f deploy/docker-compose.prod.yml up -d
-```
-
-## 4. Verificación
-
-### 4.1 Verificar Servicios
-
-- API: http://localhost:3000
-- SQL Server: localhost:1433
-
-### 4.2 Verificar Logs
-
-```bash
-# Ver logs de la API
-docker-compose logs -f api
-
-# Ver logs de SQL Server
-docker-compose logs -f sqlserver
-```
-
-## 5. Comandos Útiles
-
-### 5.1 Desarrollo
-
-```bash
-# Iniciar en modo desarrollo
+#### Desarrollo
+\`\`\`bash
 npm run start:dev
+\`\`\`
 
-# Construir el proyecto
+#### Producción
+\`\`\`bash
 npm run build
+npm run start:prod
+\`\`\`
 
-# Ejecutar tests
-npm run test
+## 📘 Uso Básico
 
-# Linting
-npm run lint
-```
+### 1. Autenticación
 
-### 5.2 Docker
+#### Login
+\`\`\`bash
+curl -X POST http://localhost:3000/auth/login -H "Content-Type: application/json" -d '{"email":"admin@example.com","password":"password"}'
+\`\`\`
 
-```bash
-# Detener servicios
-docker-compose down
+### 2. Sincronización
 
-# Reconstruir servicios
-docker-compose up --build
+#### Sincronización Manual
+\`\`\`bash
+curl -X POST http://localhost:3000/sync -H "Authorization: Bearer <token>"
+\`\`\`
 
-# Ver logs
-docker-compose logs -f
+#### Sincronizar Productos
+\`\`\`bash
+curl -X POST http://localhost:3000/sync/products -H "Authorization: Bearer <token>"
+\`\`\`
 
-# Acceder a la consola de SQL Server
-docker-compose exec sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd
-```
+### 3. Gestión de Datos
 
-## 6. Solución de Problemas
+#### Productos
+- GET /products - Listar productos
+- GET /products/:id - Obtener producto
+- POST /products - Crear producto
+- PATCH /products/:id - Actualizar producto
+- DELETE /products/:id - Eliminar producto
 
-### 6.1 Problemas Comunes
+#### Clientes
+- GET /customers - Listar clientes
+- GET /customers/:id - Obtener cliente
+- POST /customers - Crear cliente
+- PATCH /customers/:id - Actualizar cliente
+- DELETE /customers/:id - Eliminar cliente
 
-1. **Error de conexión a la base de datos**
+#### Órdenes
+- GET /orders - Listar órdenes
+- GET /orders/:id - Obtener orden
+- POST /orders - Crear orden
+- PATCH /orders/:id - Actualizar orden
+- DELETE /orders/:id - Eliminar orden
 
-   - Verificar que SQL Server esté corriendo
-   - Verificar credenciales en .env
-   - Verificar puertos expuestos
+## 🔒 Roles y Permisos
 
-2. **Error de sincronización con DERMOFARM**
+### Admin
+- Acceso completo a todas las funcionalidades
+- Gestión de usuarios
+- Sincronización manual
+- CRUD completo en todas las entidades
 
-   - Verificar URL de la API en .env
-   - Verificar conectividad
-   - Revisar logs de la API
+### Operator
+- Visualización de datos
+- Creación y actualización de órdenes
+- Consulta de productos y clientes
 
-3. **Error de permisos**
-   - Verificar roles de usuario
-   - Verificar tokens JWT
-   - Revisar logs de autenticación
+## 🔍 Monitoreo
 
-### 6.2 Recursos Adicionales
+### Logs
+Los logs se encuentran en:
+- /logs/app.log - Logs generales
+- /logs/error.log - Logs de errores
+- /logs/sync.log - Logs de sincronización
 
-- [Documentación Técnica](TECHNICAL.md)
-- [Documentación Funcional](FUNCTIONAL.md)
-- [Documentación de la API](API.md)
+### Swagger
+Documentación de la API disponible en:
+http://localhost:3000/api
+
+## ⚠️ Solución de Problemas Comunes
+
+### Error de Conexión a DERMOFARM
+1. Verificar DERMOFARM_API_URL en .env
+2. Comprobar conectividad de red
+3. Validar DERMOFARM_API_KEY
+
+### Error de Base de Datos
+1. Verificar configuración en .env
+2. Comprobar que la base de datos está activa
+3. Validar permisos de usuario
+
+### Error de Sincronización
+1. Revisar logs en /logs/sync.log
+2. Verificar estado de la API de DERMOFARM
+3. Intentar sincronización manual
+
+## 📞 Soporte
+
+Para soporte técnico:
+- Email: soporte@dermofarm.com
+- Tel: +XX XXX XXX XXX
+
+## 🔄 Actualizaciones
+
+Para actualizar el sistema:
+1. Detener el servicio
+2. Hacer backup de la base de datos
+3. Pull de los últimos cambios
+4. Instalar dependencias
+5. Ejecutar migraciones
+6. Reiniciar el servicio

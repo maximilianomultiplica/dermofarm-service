@@ -23,8 +23,22 @@ export class ProductService {
     return await this.productRepository.save(product);
   }
 
-  async findAll(): Promise<Product[]> {
-    return await this.productRepository.find();
+  async findAll(page = 1, limit = 10, search?: string): Promise<{ items: Product[], total: number }> {
+    const queryBuilder = this.productRepository.createQueryBuilder('product');
+    
+    if (search) {
+      queryBuilder.where('product.name LIKE :search OR product.description LIKE :search', {
+        search: `%${search}%`
+      });
+    }
+
+    const [items, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .cache(true) // Habilitar caché
+      .getManyAndCount();
+
+    return { items, total };
   }
 
   async findOne(id: number): Promise<Product> {
@@ -54,37 +68,40 @@ export class ProductService {
   async syncWithDermofarm(): Promise<void> {
     try {
       const dermofarmProducts = await this.dermofarmService.getProducts() as any[];
-
-      for (const dermofarmProduct of dermofarmProducts) {
-        const existingProduct = await this.productRepository.findOne({
-          where: { dermofarmId: dermofarmProduct.id },
-        });
-
-        if (existingProduct) {
-          // Update existing product
-          Object.assign(existingProduct, {
-            name: dermofarmProduct.name,
-            description: dermofarmProduct.description,
-            price: dermofarmProduct.price,
-            stock: dermofarmProduct.stock,
-            lastSync: new Date(),
-          });
-          await this.productRepository.save(existingProduct);
-        } else {
-          // Create new product
-          const newProduct = this.productRepository.create({
-            dermofarmId: dermofarmProduct.id,
-            name: dermofarmProduct.name,
-            description: dermofarmProduct.description,
-            price: dermofarmProduct.price,
-            stock: dermofarmProduct.stock,
-            lastSync: new Date(),
-          });
-          await this.productRepository.save(newProduct);
+      
+      await this.productRepository.manager.transaction(async transactionalEntityManager => {
+        const chunks = this.chunkArray(dermofarmProducts, 50);
+        
+        for (const chunk of chunks) {
+          await transactionalEntityManager
+            .createQueryBuilder()
+            .insert()
+            .into(Product)
+            .values(chunk.map(p => ({
+              dermofarmId: p.id,
+              name: p.name,
+              description: p.description,
+              price: p.price,
+              stock: p.stock,
+              lastSync: new Date()
+            })))
+            .orUpdate(
+              ['name', 'description', 'price', 'stock', 'lastSync'],
+              ['dermofarmId']
+            )
+            .execute();
         }
-      }
+      });
     } catch (error) {
-      throw new BadRequestException("Failed to sync products with DERMOFARM");
+      throw new BadRequestException(`Failed to sync products with DERMOFARM: ${error.message}`);
     }
+  }
+
+  private chunkArray<T>(array: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
   }
 }

@@ -4,192 +4,166 @@
 
 ### 1.1 Visión General
 
-El servicio DERMOFARM está construido como una aplicación Node.js/Express que actúa como middleware de integración entre la base de datos de DERMOFARM y el ecosistema del agente. La arquitectura sigue el patrón MVC (Model-View-Controller) y está diseñada para ser escalable y mantenible.
+El servicio DERMOFARM está construido como una aplicación NestJS que actúa como middleware de integración entre la base de datos de DERMOFARM y el sistema del agente. La arquitectura sigue un diseño modular con una clara separación de responsabilidades.
 
 ### 1.2 Stack Tecnológico
 
 - **Runtime**: Node.js v18+
-- **Framework**: Express.js
+- **Framework**: NestJS v10
 - **Lenguaje**: TypeScript
-- **Base de Datos**: PostgreSQL (DERMOFARM)
-- **Gestión de Dependencias**: npm/yarn
+- **Base de Datos**: SQL Server (Producción), SQLite (Desarrollo)
+- **ORM**: TypeORM
+- **Autenticación**: JWT + Passport
+- **Documentación API**: Swagger/OpenAPI
 - **Seguridad**: Helmet, CORS
-- **Documentación**: Swagger/OpenAPI
+- **Sincronización**: Tareas programadas con @nestjs/schedule
 
-### 1.3 Estructura del Proyecto
+## 2. Estructura del Proyecto
 
 ```
 src/
-├── config/         # Configuraciones y variables de entorno
-├── controllers/    # Controladores de la lógica de negocio
-├── middlewares/    # Middlewares de Express
-├── routes/         # Definición de rutas API
-└── app.ts          # Punto de entrada de la aplicación
+├── config/              # Configuraciones del sistema
+├── modules/            # Módulos principales
+│   ├── auth/          # Autenticación y autorización
+│   ├── products/      # Gestión de productos
+│   ├── customers/     # Gestión de clientes
+│   ├── orders/        # Gestión de órdenes
+│   └── sync/          # Sincronización con DERMOFARM
+├── services/           # Servicios compartidos
+└── utils/             # Utilidades y helpers
 ```
 
-## 2. Componentes Principales
+## 3. Módulos Principales
 
-### 2.1 Configuración (config/)
+### 3.1 Módulo de Autenticación (auth)
+- Autenticación mediante JWT
+- Sistema de roles (admin, operator)
+- Protección de rutas
+- Registro y login de usuarios
 
-- **env.ts**: Gestión de variables de entorno
-- **database.ts**: Configuración de conexión a base de datos
-- **logger.ts**: Configuración de logging
+### 3.2 Módulo de Productos (products)
+- CRUD de productos
+- Sincronización con catálogo DERMOFARM
+- Gestión de stock
+- Historial de cambios
 
-### 2.2 Controladores (controllers/)
+### 3.3 Módulo de Clientes (customers)
+- CRUD de clientes
+- Vinculación con DERMOFARM
+- Historial de órdenes
+- Datos de contacto
 
-- **ProductController**: Gestión de productos
-- **OrderController**: Gestión de órdenes
-- **CustomerController**: Gestión de clientes
-- **SyncController**: Control de sincronización
+### 3.4 Módulo de Órdenes (orders)
+- Gestión de pedidos
+- Items de orden
+- Estados de pedido
+- Sincronización bidireccional
 
-### 2.3 Middlewares (middlewares/)
-
-- **error.middleware.ts**: Manejo de errores global
-- **auth.middleware.ts**: Autenticación y autorización
-- **validation.middleware.ts**: Validación de datos
-
-### 2.4 Rutas (routes/)
-
-- **product.routes.ts**: Endpoints de productos
-- **order.routes.ts**: Endpoints de órdenes
-- **customer.routes.ts**: Endpoints de clientes
-- **sync.routes.ts**: Endpoints de sincronización
-
-## 3. Flujos de Datos
-
-### 3.1 Sincronización de Productos
-
-1. Cliente solicita sincronización
-2. Sistema obtiene datos de DERMOFARM
-3. Transformación de datos al formato del agente
-4. Envío al sistema del agente
-5. Actualización de estado de sincronización
-
-### 3.2 Sincronización de Órdenes
-
-1. Monitoreo de nuevas órdenes en DERMOFARM
-2. Validación de datos
-3. Transformación al formato del agente
-4. Envío al sistema del agente
-5. Actualización de estado
-
-### 3.3 Sincronización de Clientes
-
-1. Obtención de datos de clientes
-2. Validación y limpieza de datos
-3. Transformación al formato del agente
-4. Envío al sistema del agente
-5. Actualización de estado
+### 3.5 Módulo de Sincronización (sync)
+- Sincronización automática cada 30 minutos
+- Sincronización manual por demanda
+- Registro de sincronización
+- Manejo de errores
 
 ## 4. Seguridad
 
 ### 4.1 Autenticación
-
-- JWT para autenticación de API
+- JWT para tokens de acceso
 - Validación de tokens
 - Refresh tokens
+- Almacenamiento seguro de contraseñas
 
 ### 4.2 Autorización
-
-- Roles y permisos
+- Control de acceso basado en roles
+- Protección de rutas sensibles
 - Middleware de autorización
-- Validación de acceso
+- Validación de permisos
 
-### 4.3 Protección de Datos
+## 5. Base de Datos
 
-- Encriptación de datos sensibles
-- Sanitización de inputs
-- Protección contra ataques comunes
+### 5.1 Entidades Principales
+- User (auth)
+- Product (products)
+- Customer (customers)
+- Order (orders)
+- OrderItem (orders)
 
-## 5. Manejo de Errores
+### 5.2 Configuración
+- Múltiples entornos (desarrollo, producción)
+- Migraciones automáticas en desarrollo
+- Sincronización manual en producción
+- Backups y recuperación
 
-### 5.1 Estrategia de Errores
+## 6. API REST
 
-- Errores personalizados
-- Logging estructurado
-- Respuestas de error estandarizadas
+### 6.1 Endpoints Principales
+- /auth - Autenticación y gestión de usuarios
+- /products - Gestión de productos
+- /customers - Gestión de clientes
+- /orders - Gestión de órdenes
+- /sync - Control de sincronización
 
-### 5.2 Reintentos
-
-- Política de reintentos para operaciones fallidas
-- Backoff exponencial
-- Límites de reintentos
-
-## 6. Monitoreo y Logging
-
-### 6.1 Métricas
-
-- Tiempo de respuesta
-- Tasa de éxito/error
-- Uso de recursos
-
-### 6.2 Logs
-
-- Logs estructurados
-- Niveles de log
-- Rotación de logs
+### 6.2 Documentación
+- Swagger UI disponible en /api
+- Descripción detallada de endpoints
+- Ejemplos de solicitudes
+- Esquemas de respuesta
 
 ## 7. Despliegue
 
 ### 7.1 Requisitos
-
 - Node.js v18+
-- PostgreSQL
+- SQL Server (producción)
 - Variables de entorno configuradas
+- Permisos de red para DERMOFARM API
 
-### 7.2 Proceso de Despliegue
-
-1. Build del proyecto
-2. Tests automatizados
-3. Despliegue en ambiente de staging
-4. Validación
-5. Despliegue en producción
-
-### 7.3 Configuración de Producción
-
-- PM2 para gestión de procesos
-- Nginx como proxy inverso
-- SSL/TLS
-- Monitoreo y alertas
+### 7.2 Proceso
+1. Instalación de dependencias
+2. Configuración de variables de entorno
+3. Compilación del proyecto
+4. Inicio del servidor
+5. Verificación de sincronización
 
 ## 8. Mantenimiento
 
-### 8.1 Tareas Periódicas
+### 8.1 Logs
+- Logs de aplicación
+- Logs de sincronización
+- Logs de errores
+- Rotación de logs
 
-- Limpieza de logs
-- Optimización de base de datos
-- Actualización de dependencias
+### 8.2 Monitoreo
+- Estado de sincronización
+- Rendimiento de API
+- Uso de recursos
+- Alertas y notificaciones
 
-### 8.2 Backups
+## 9. Solución de Problemas
 
-- Estrategia de backups
-- Restauración de datos
-- Retención de backups
+### 9.1 Problemas Comunes
+- Errores de sincronización
+- Problemas de conexión
+- Errores de autenticación
+- Conflictos de datos
 
-## 9. Consideraciones de Escalabilidad
+### 9.2 Procedimientos
+1. Verificar logs
+2. Comprobar conexiones
+3. Validar configuración
+4. Resincronizar datos
 
-### 9.1 Arquitectura
+## 10. Contribución
 
-- Diseño modular
-- Microservicios (si es necesario)
-- Caché distribuido
+### 10.1 Guías
+- Estilo de código
+- Proceso de revisión
+- Tests requeridos
+- Documentación necesaria
 
-### 9.2 Rendimiento
-
-- Optimización de consultas
-- Caché de datos
-- Balanceo de carga
-
-## 10. Troubleshooting
-
-### 10.1 Problemas Comunes
-
-- Errores de conexión
-- Problemas de sincronización
-- Errores de validación
-
-### 10.2 Soluciones
-
-- Procedimientos de diagnóstico
-- Herramientas de debugging
-- Procedimientos de recuperación
+### 10.2 Flujo de Trabajo
+1. Crear rama feature/fix
+2. Implementar cambios
+3. Pruebas unitarias
+4. Pull Request
+5. Code Review
+6. Merge a main
