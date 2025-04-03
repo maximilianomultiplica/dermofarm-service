@@ -3,7 +3,7 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-      target: production
+      target: development
     container_name: dermofarm-api-prod
     restart: unless-stopped
     ports:
@@ -11,7 +11,7 @@ services:
     env_file:
       - .env.prd
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - IS_DOCKER=true
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${PORT:-3000}/api"]
