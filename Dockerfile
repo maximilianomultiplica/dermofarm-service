@@ -25,43 +25,43 @@ EXPOSE 3000
 # Start the application in development mode
 CMD ["npm", "run", "start:dev"]
 
-# # Production build stage
-# FROM base AS builder
-# ENV NODE_ENV=production
-# ENV IS_DOCKER=true
+# Production build stage
+FROM base AS builder
+ENV NODE_ENV=production
+ENV IS_DOCKER=true
 
-# # Install all dependencies for building
-# RUN npm ci
+# Install all dependencies for building
+RUN npm ci
 
-# # Copy the application
-# COPY . .
-# RUN npm install -g @nestjs/cli
+# Copy the application
+COPY . .
+RUN npm install -g @nestjs/cli
 
-# # Build the application
-# RUN npm run build
+# Build the application
+RUN npm run build
 
-# # Production stage
-# FROM node:18-alpine AS production
-# WORKDIR /app
+# Production stage
+FROM node:18-alpine AS production
+WORKDIR /app
 
-# # Install necessary tools for SQLServer connection in production
-# RUN apk add --no-cache unixodbc
+# Install necessary tools for SQLServer connection in production
+RUN apk add --no-cache unixodbc
 
-# # Set production environment
-# ENV NODE_ENV=production
-# ENV IS_DOCKER=true
+# Set production environment
+ENV NODE_ENV=production
+ENV IS_DOCKER=true
 
-# # Copy package files
-# COPY package*.json ./
+# Copy package files
+COPY package*.json ./
 
-# # Install production dependencies only
-# RUN npm ci --only=production
+# Install production dependencies only
+RUN npm ci --only=production
 
-# # Copy the built application from the builder stage
-# COPY --from=builder /app/dist ./dist
+# Copy the built application from the builder stage
+COPY --from=builder /app/dist ./dist
 
-# # Expose the server port
-# EXPOSE 3000
+# Expose the server port
+EXPOSE 3000
 
-# # Start the application in production mode
-# CMD ["npm", "run", "start:prod"] 
+# Start the application in production mode
+CMD ["npm", "run", "start:prod"] 
