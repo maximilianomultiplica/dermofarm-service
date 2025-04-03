@@ -36,6 +36,7 @@ RUN npm ci
 # Copy the application
 COPY . .
 RUN npm install -g @nestjs/cli
+RUN npm install
 
 # Build the application
 RUN npm run build
