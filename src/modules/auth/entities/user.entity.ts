@@ -17,11 +17,12 @@ export class User {
   password: string;
 
   @Column({
-    type: 'enum',
-    enum: UserRole,
+    type: 'nvarchar', // o 'varchar' si no usás Unicode
+    length: 20,
     default: UserRole.OPERATOR
   })
   role: UserRole;
+  
 
   @CreateDateColumn()
   createdAt: Date;
