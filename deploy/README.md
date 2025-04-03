@@ -264,8 +264,8 @@ cp .env.prod .env.prod.backup
 - [TypeORM Documentation](https://typeorm.io/)
 - [SQL Server Documentation](https://docs.microsoft.com/en-us/sql/sql-server/)
 
-Para desarrollo
+Para desarrollo, se ven los logs
 sudo docker-compose --env-file .env.prd -p agent2 -f docker-compose.prod.yml up
 
-Para dejar andando
+Para dejar andando productivo
 sudo docker-compose --env-file .env.prd -p agent2 -f docker-compose.prod.yml up -d
