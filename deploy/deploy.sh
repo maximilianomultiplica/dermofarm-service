@@ -60,31 +60,9 @@ set -a
 source .env.prod
 set +a
 
-# Backup de la base de datos si existe
-if [ "$(docker ps -a | grep dermofarm-sqlserver-prod)" ]; then
-    print_message "Realizando backup de la base de datos existente..." "$YELLOW"
-    BACKUP_DATE=$(date '+%Y%m%d_%H%M%S')
-    mkdir -p ./backups
-    docker exec dermofarm-sqlserver-prod /opt/mssql-tools/bin/sqlcmd -S localhost -U $DB_USER -P "$DB_PASSWORD" \
-        -Q "BACKUP DATABASE [$DB_NAME] TO DISK = N'/var/opt/mssql/backup_$BACKUP_DATE.bak' WITH NOFORMAT, NOINIT, NAME = '$DB_NAME-full', SKIP, NOREWIND, NOUNLOAD, STATS = 10"
-    
-    # Copiar el backup del contenedor al host
-    docker cp dermofarm-sqlserver-prod:/var/opt/mssql/backup_$BACKUP_DATE.bak ./backups/
-    
-    if [ $? -eq 0 ]; then
-        print_message "Backup completado con éxito y guardado en ./backups/backup_$BACKUP_DATE.bak" "$GREEN"
-    else
-        print_message "Advertencia: El backup no se pudo completar. Continuando de todos modos..." "$YELLOW"
-    fi
-fi
-
-# Detener contenedores existentes
-print_message "Deteniendo contenedores existentes..." "$YELLOW"
-docker-compose -f docker-compose.prod.yml down
-
 # Construir la imagen
 print_message "Construyendo imagen de producción..." "$YELLOW"
-docker-compose -f docker-compose.prod.yml build --no-cache
+docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 build --no-cache
 
 # Si hubo un error en la construcción, salir
 if [ $? -ne 0 ]; then
@@ -94,7 +72,7 @@ fi
 
 # Iniciar los servicios
 print_message "Iniciando servicios..." "$YELLOW"
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 up -d
 
 # Si hubo un error al iniciar los servicios, salir
 if [ $? -ne 0 ]; then
@@ -104,12 +82,12 @@ fi
 
 # Verificar el estado de los servicios
 print_message "Verificando estado de los servicios..." "$YELLOW"
-docker-compose -f docker-compose.prod.yml ps
+docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 ps
 
 # Verificar que el servicio API está en ejecución
 if ! docker ps | grep -q dermofarm-api-prod; then
     print_message "Error: El servicio API no está en ejecución. Verifica los logs para más detalles." "$RED"
-    docker-compose -f docker-compose.prod.yml logs api
+    docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 logs api
     exit 1
 fi
 
@@ -125,7 +103,7 @@ done
 
 if [ $attempts -eq $max_attempts ]; then
     print_message "Error: El servicio no está disponible después de $max_attempts intentos. Verifica los logs para más detalles." "$RED"
-    docker-compose -f docker-compose.prod.yml logs api
+    docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 logs api
     exit 1
 fi
 

@@ -43,15 +43,12 @@ services:
     ports:
       - "${DB_PORT:-1433}:1433"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - ./.sqlserver_data:/var/opt/mssql
     cap_add:
       - SYS_PTRACE
     networks:
       - dermofarm-network
     restart: unless-stopped
-
-volumes:
-  sqlserver_data:
 
 networks:
   dermofarm-network:
