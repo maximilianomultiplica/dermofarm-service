@@ -263,3 +263,9 @@ cp .env.prod .env.prod.backup
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [TypeORM Documentation](https://typeorm.io/)
 - [SQL Server Documentation](https://docs.microsoft.com/en-us/sql/sql-server/)
+
+Para desarrollo
+sudo docker-compose --env-file .env.prd -p agent2 -f docker-compose.prod.yml up
+
+Para dejar andando
+sudo docker-compose --env-file .env.prd -p agent2 -f docker-compose.prod.yml up -d
