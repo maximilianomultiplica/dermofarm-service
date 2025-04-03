@@ -9,6 +9,15 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { winstonConfig } from './config/logger.config';
 import { DermofarmService } from './services/dermofarm.service';
 
+// Entidades
+import { DelegateEntity } from './entities/delegate.entity';
+
+// Controladores
+import { DelegateController } from './controllers/delegate.controller';
+
+// Servicios
+import { DelegateService } from './services/delegate.service';
+
 // Importar los módulos core de Dermofarm
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
@@ -28,6 +37,7 @@ import { SyncModule } from './modules/sync/sync.module';
       limit: 10,
     }]),
     TypeOrmModule.forRoot(typeOrmConfig),
+    TypeOrmModule.forFeature([DelegateEntity]),
     // Registrar los módulos core de Dermofarm
     ProductsModule,
     OrdersModule,
@@ -35,8 +45,8 @@ import { SyncModule } from './modules/sync/sync.module';
     AuthModule,
     SyncModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, DermofarmService],
+  controllers: [AppController, DelegateController],
+  providers: [AppService, DermofarmService, DelegateService],
   exports: [DermofarmService],
 })
 export class AppModule {}
