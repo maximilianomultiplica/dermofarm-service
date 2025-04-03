@@ -53,9 +53,7 @@ ENV IS_DOCKER=true
 
 # Copy package files
 COPY package*.json ./
-
-# Install production dependencies only
-RUN npm ci --only=production
+RUN npm install
 
 # Copy the built application from the builder stage
 COPY --from=builder /app/dist ./dist
