@@ -9,7 +9,7 @@ services:
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     env_file:
-      - .env.prd
+      - .env
     environment:
       - NODE_ENV=development
       - IS_DOCKER=true
@@ -24,5 +24,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-        env_file: ".env"
-
