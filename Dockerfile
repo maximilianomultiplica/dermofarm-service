@@ -2,8 +2,13 @@
 FROM node:18-alpine AS base
 WORKDIR /app
 
-# Install necessary tools for database connections and build
-RUN apk add --no-cache python3 make g++ unixodbc unixodbc-dev sqlite
+# Install necessary tools for database connections, build, and SQL Server tools
+RUN apk add --no-cache python3 make g++ unixodbc unixodbc-dev sqlite curl gnupg
+# Install SQL Server command-line tools
+RUN curl -O https://download.microsoft.com/download/1/f/f/1fffb537-26ab-4947-a46a-7a45c27f6f77/msodbcsql18_18.2.1.1-1_amd64.apk && \
+    curl -O https://download.microsoft.com/download/1/f/f/1fffb537-26ab-4947-a46a-7a45c27f6f77/mssql-tools18_18.2.1.1-1_amd64.apk && \
+    apk add --allow-untrusted msodbcsql18_18.2.1.1-1_amd64.apk && \
+    apk add --allow-untrusted mssql-tools18_18.2.1.1-1_amd64.apk
 
 # Copy package files
 COPY package*.json ./
@@ -15,6 +20,8 @@ ENV IS_DOCKER=true
 
 # Install all dependencies
 RUN npm install
+# Rebuild bcrypt for the current architecture
+RUN npm rebuild bcrypt --build-from-source
 
 # Copy the application
 COPY . .
@@ -55,6 +62,8 @@ ENV IS_DOCKER=true
 # Copy package files
 COPY package*.json ./
 RUN npm install
+# Rebuild bcrypt for the current architecture
+RUN npm rebuild bcrypt --build-from-source
 
 # Copy the built application from the builder stage
 COPY --from=builder /app/dist ./dist

@@ -25,9 +25,11 @@ services:
       - DB_TYPE=mssql
     depends_on:
       - sqlserver
-    command: sh -c "npm run start:dev"
-    networks:
-      - dermofarm-network
+    command: sh -c "
+        npm rebuild bcrypt --build-from-source && 
+        sleep 30s && 
+        npm run start:dev
+      "
     restart: unless-stopped
 
   # SQL Server con compatibilidad para ARM64 mediante Azure SQL Edge
@@ -46,10 +48,4 @@ services:
       - ./.sqlserver_data:/var/opt/mssql
     cap_add:
       - SYS_PTRACE
-    networks:
-      - dermofarm-network
     restart: unless-stopped
-
-networks:
-  dermofarm-network:
-    driver: bridge 

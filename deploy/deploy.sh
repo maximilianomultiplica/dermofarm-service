@@ -29,28 +29,36 @@ fi
 # Verificar que el archivo .env.prod existe
 if [ ! -f .env.prod ]; then
     print_message "Error: El archivo .env.prod no existe en el directorio actual." "$RED"
-    print_message "Creando archivo .env.prod de ejemplo..." "$YELLOW"
-    cat > .env.prod << EOF
-# Server Configuration
-PORT=3000
+    print_message "Creando archivo .env.prod a partir de .env.prod.example..." "$YELLOW"
+    
+    if [ -f .env.prod.example ]; then
+        cp .env.prod.example .env.prod
+        print_message "Archivo .env.prod creado a partir de .env.prod.example. Por favor, edita este archivo con los valores correctos y vuelve a ejecutar este script." "$GREEN"
+    else
+        print_message "No se encontró .env.prod.example. Creando archivo .env.prod con valores predeterminados..." "$YELLOW"
+        cat > .env.prod << EOF
+# Entorno
 NODE_ENV=production
+PORT=3000
 IS_DOCKER=true
 
-# Database Configuration - SQL Server (for Docker)
-DB_HOST=sqlserver
+# Base de Datos (proporcionada por el cliente - solo lectura)
+DB_HOST=sql-ai.database.windows.net
 DB_PORT=1433
-DB_NAME=dermofarm
-DB_USER=sa
-DB_PASSWORD=StrongProductionPassword!
+DB_NAME=Delegate_DB
+DB_USER=ai_usr
+DB_PASSWORD=QNQ@DBr@QU&YsfKW6Dckct
 
-# Dermofarm API 
-DERMOFARM_API_URL=http://api.dermofarm.com
+# API del Agente
+AGENT_API_URL=https://your-agent-api-url
+AGENT_API_KEY=your-agent-api-key
 
 # JWT Configuration
 JWT_SECRET=$(openssl rand -hex 32)
-JWT_EXPIRATION=24h
+JWT_EXPIRATION=1h
 EOF
-    print_message "Archivo .env.prod creado. Por favor, edita este archivo con los valores correctos y vuelve a ejecutar este script." "$GREEN"
+        print_message "Archivo .env.prod creado. Por favor, edita este archivo con los valores correctos y vuelve a ejecutar este script." "$GREEN"
+    fi
     exit 1
 fi
 
@@ -62,7 +70,7 @@ set +a
 
 # Construir la imagen
 print_message "Construyendo imagen de producción..." "$YELLOW"
-docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 build --no-cache
+docker-compose --env-file .env.prod -f docker-compose.prod.yml -p agent2 build --no-cache
 
 # Si hubo un error en la construcción, salir
 if [ $? -ne 0 ]; then
@@ -72,7 +80,7 @@ fi
 
 # Iniciar los servicios
 print_message "Iniciando servicios..." "$YELLOW"
-docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 up -d
+docker-compose --env-file .env.prod -f docker-compose.prod.yml -p agent2 up -d
 
 # Si hubo un error al iniciar los servicios, salir
 if [ $? -ne 0 ]; then
@@ -82,12 +90,12 @@ fi
 
 # Verificar el estado de los servicios
 print_message "Verificando estado de los servicios..." "$YELLOW"
-docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 ps
+docker-compose --env-file .env.prod -f docker-compose.prod.yml -p agent2 ps
 
 # Verificar que el servicio API está en ejecución
 if ! docker ps | grep -q dermofarm-api-prod; then
     print_message "Error: El servicio API no está en ejecución. Verifica los logs para más detalles." "$RED"
-    docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 logs api
+    docker-compose --env-file .env.prod -f docker-compose.prod.yml -p agent2 logs api
     exit 1
 fi
 
@@ -103,7 +111,7 @@ done
 
 if [ $attempts -eq $max_attempts ]; then
     print_message "Error: El servicio no está disponible después de $max_attempts intentos. Verifica los logs para más detalles." "$RED"
-    docker-compose --env-file .env.prd -f docker-compose.prod.yml -p agent2 logs api
+    docker-compose --env-file .env.prod -f docker-compose.prod.yml -p agent2 logs api
     exit 1
 fi
 
