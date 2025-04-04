@@ -48,6 +48,8 @@ cp .env.prod.example .env.prod
 nano .env.prod
 ```
 
+> **Nota:** El script de despliegue `deploy.sh` creará automáticamente el archivo `.env.prod` a partir de `.env.prod.example` si no existe.
+
 3. Variables requeridas:
 
 ```env
@@ -103,31 +105,31 @@ Si es necesario realizar el despliegue manualmente:
 1. Detener contenedores existentes:
 
 ```bash
-docker-compose -f docker-compose.prod.yml down
+docker-compose --env-file .env.prod -f docker-compose.prod.yml down
 ```
 
 2. Construir la imagen:
 
 ```bash
-docker-compose -f docker-compose.prod.yml build --no-cache
+docker-compose --env-file .env.prod -f docker-compose.prod.yml build --no-cache
 ```
 
 3. Iniciar servicios:
 
 ```bash
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose --env-file .env.prod -f docker-compose.prod.yml up -d
 ```
 
 4. Verificar estado:
 
 ```bash
-docker-compose -f docker-compose.prod.yml ps
+docker-compose --env-file .env.prod -f docker-compose.prod.yml ps
 ```
 
 5. Verificar logs:
 
 ```bash
-docker-compose -f docker-compose.prod.yml logs -f
+docker-compose --env-file .env.prod -f docker-compose.prod.yml logs -f
 ```
 
 ## 4. Verificación del Despliegue
@@ -136,13 +138,13 @@ docker-compose -f docker-compose.prod.yml logs -f
 
 ```bash
 # Ver estado de contenedores
-docker-compose -f docker-compose.prod.yml ps
+docker-compose --env-file .env.prod -f docker-compose.prod.yml ps
 
 # Ver logs en tiempo real
-docker-compose -f docker-compose.prod.yml logs -f
+docker-compose --env-file .env.prod -f docker-compose.prod.yml logs -f
 
 # Verificar health check
-curl http://localhost:3000/health
+curl http://localhost:3000/api
 ```
 
 ### 4.2 Verificar Conexión a Base de Datos
@@ -162,7 +164,7 @@ node -e "const { Client } = require('mssql'); const config = require('./src/conf
 1. Detener servicios:
 
 ```bash
-docker-compose -f docker-compose.prod.yml down
+docker-compose --env-file .env.prod -f docker-compose.prod.yml down
 ```
 
 2. Actualizar código:
@@ -194,10 +196,10 @@ docker volume prune
 
 ```bash
 # Ver logs en tiempo real
-docker-compose -f docker-compose.prod.yml logs -f
+docker-compose --env-file .env.prod -f docker-compose.prod.yml logs -f
 
 # Ver últimos 100 logs
-docker-compose -f docker-compose.prod.yml logs --tail=100
+docker-compose --env-file .env.prod -f docker-compose.prod.yml logs --tail=100
 ```
 
 ## 6. Solución de Problemas
@@ -229,7 +231,7 @@ docker-compose -f docker-compose.prod.yml logs --tail=100
 
 ```bash
 # Ver logs de la aplicación
-docker-compose -f docker-compose.prod.yml logs api
+docker-compose --env-file .env.prod -f docker-compose.prod.yml logs api
 
 # Ver logs del sistema
 journalctl -u docker
@@ -265,7 +267,11 @@ cp .env.prod .env.prod.backup
 - [SQL Server Documentation](https://docs.microsoft.com/en-us/sql/sql-server/)
 
 Para desarrollo, se ven los logs
-sudo docker-compose --env-file .env.prd -p agent2 -f docker-compose.prod.yml up
+```bash
+sudo docker-compose --env-file .env.prod -p agent2 -f docker-compose.prod.yml up
+```
 
 Para dejar andando productivo
-sudo docker-compose --env-file .env.prd -p agent2 -f docker-compose.prod.yml up -d
+```bash
+sudo docker-compose --env-file .env.prod -p agent2 -f docker-compose.prod.yml up -d
+```
